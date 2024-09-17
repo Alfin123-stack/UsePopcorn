@@ -51,32 +51,45 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 const apiKey = "cc5bd20f";
-const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(
-  "interstellar"
-)}`;
+const url = `http://www.omdbapi.com/?apikey=${apiKey}&s=sdfsdfsd`;
 
 export default function App() {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  useEffect(function () {
-    fetch(url)
-      .then((response) => {
+  useEffect(() => {
+    // Define an asynchronous function to fetch movie data
+    const fetchMovies = async () => {
+      try {
+        setIsLoading(true);
+        // Fetch the data from the API
+        const response = await fetch(url);
+
         // Check if the response is okay (status in the range 200-299)
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
         // Parse the JSON data from the response
-        return response.json();
-      })
-      .then((data) => {
+        const data = await response.json();
+
+        if (data.Response === "False") throw new Error("Movie not found");
+
         // Handle the data
         setMovies(data.Search);
-      })
-      .catch((error) => {
+      } catch (error) {
         // Handle any errors that occurred during the fetch
         console.error("Error fetching data:", error);
-      });
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // Call the fetch function
+    fetchMovies();
   }, []);
 
   return (
@@ -88,7 +101,9 @@ export default function App() {
       </Navbar>
       <Main>
         <Box>
-          <MovieLists movies={movies} />
+          {isLoading && <Loader />}
+          {!isLoading && !error && <MovieLists movies={movies} />}
+          {error && <ErrorMessage message={error} />}
         </Box>
         <Box>
           <WatchedSummary watched={watched} />
@@ -98,6 +113,19 @@ export default function App() {
     </>
   );
 }
+function Loader() {
+  return <p className="loader">Loading.....</p>;
+}
+
+function ErrorMessage({ message }) {
+  return (
+    <p className="error">
+      <span>💔</span>
+      {message}
+    </p>
+  );
+}
+
 // MAIN
 function Main({ children }) {
   return <main className="main">{children}</main>;
