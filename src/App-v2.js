@@ -10,7 +10,16 @@ export default function App() {
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("avengers");
+  const [selectedId, setSelectedId] = useState(null);
+
+  function handleSelectedId(movieId) {
+    setSelectedId((id) => (id === movieId ? null : movieId));
+  }
+
+  function handleCloseDetails() {
+    setSelectedId(null);
+  }
 
   useEffect(() => {
     // Define an asynchronous function to fetch movie data
@@ -64,12 +73,23 @@ export default function App() {
       <Main>
         <Box>
           {isLoading && <Loader />}
-          {!isLoading && !error && <MovieLists movies={movies} />}
+          {!isLoading && !error && (
+            <MovieLists movies={movies} onSelectedId={handleSelectedId} />
+          )}
           {error && <ErrorMessage message={error} />}
         </Box>
         <Box>
-          <WatchedSummary watched={watched} />
-          <WatchedMovieLists watched={watched} />
+          {selectedId ? (
+            <MovieDetails
+              selectedId={selectedId}
+              onCloseDetails={handleCloseDetails}
+            />
+          ) : (
+            <>
+              <WatchedSummary watched={watched} />
+              <WatchedMovieLists watched={watched} />
+            </>
+          )}
         </Box>
       </Main>
     </>
@@ -105,19 +125,19 @@ function Box({ children }) {
   );
 }
 
-function MovieLists({ movies }) {
+function MovieLists({ movies, onSelectedId }) {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie) => (
-        <Movie movie={movie} key={movie.imdbID} />
+        <Movie movie={movie} key={movie.imdbID} onSelectedId={onSelectedId} />
       ))}
     </ul>
   );
 }
 
-function Movie({ movie }) {
+function Movie({ movie, onSelectedId }) {
   return (
-    <li>
+    <li onClick={() => onSelectedId(movie.imdbID)}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -150,6 +170,17 @@ function Movie({ movie }) {
 //     </div>
 //   );
 // }
+
+function MovieDetails({ selectedId, onCloseDetails }) {
+  return (
+    <div>
+      <button className=" btn-back" onClick={onCloseDetails}>
+        ⬅
+      </button>
+      <div className="details">{selectedId}</div>
+    </div>
+  );
+}
 
 function WatchedSummary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
