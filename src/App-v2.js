@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import StarRating from "./StarRating";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -13,6 +14,7 @@ export default function App() {
   const [query, setQuery] = useState("avengers");
   const [selectedId, setSelectedId] = useState(null);
 
+  console.log("oioioioioiioiosdfdsf");
   function handleSelectedId(movieId) {
     setSelectedId((id) => (id === movieId ? null : movieId));
   }
@@ -44,11 +46,14 @@ export default function App() {
 
         // Handle the data
         setMovies(data.Search);
+
+        console.log("fetchingg");
       } catch (error) {
         // Handle any errors that occurred during the fetch
         console.error("Error fetching data:", error);
         setError(error.message);
       } finally {
+        console.log("selesai loading");
         setIsLoading(false);
       }
     };
@@ -83,6 +88,7 @@ export default function App() {
             <MovieDetails
               selectedId={selectedId}
               onCloseDetails={handleCloseDetails}
+              // key={selectedId}
             />
           ) : (
             <>
@@ -172,12 +178,73 @@ function Movie({ movie, onSelectedId }) {
 // }
 
 function MovieDetails({ selectedId, onCloseDetails }) {
+  const [movie, setMovie] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    Title: title,
+    Year: year,
+    Poster: poster,
+    Runtime: runtime,
+    imdbRating,
+    Plot: plot,
+    Released: released,
+    Actors: actors,
+    Director: director,
+    Genre: genre,
+  } = movie;
+
+  useEffect(
+    function () {
+      async function getMovieDetails() {
+        setIsLoading(true);
+        const res = await fetch(
+          `http://www.omdbapi.com/?apikey=${apiKey}&i=${selectedId}`
+        );
+        const data = await res.json();
+        setMovie(data);
+        setIsLoading(false);
+      }
+      getMovieDetails();
+    },
+    [selectedId]
+  );
+
   return (
-    <div>
-      <button className=" btn-back" onClick={onCloseDetails}>
-        ⬅
-      </button>
-      <div className="details">{selectedId}</div>
+    <div className="details">
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <>
+          <header>
+            <button className="btn-back" onClick={onCloseDetails}>
+              &larr;
+            </button>
+            <img src={poster} alt={`Poster of ${movie} movie`} />
+            <div className="details-overview">
+              <h2>{title}</h2>
+              <p>
+                {released} &bull; {runtime}
+              </p>
+              <p>{genre}</p>
+              <p>
+                <span>⭐️</span>
+                {imdbRating} IMDb rating
+              </p>
+            </div>
+          </header>
+          <section>
+            <div className="rating">
+              <StarRating maxRating={10} size={24} />
+            </div>
+            <p>
+              <em>{plot}</em>
+            </p>
+            <p>Starring {actors}</p>
+            <p>Directed by {director}</p>
+          </section>
+        </>
+      )}
     </div>
   );
 }
