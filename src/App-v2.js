@@ -280,9 +280,6 @@ function MovieDetails({
                     maxRating={10}
                     size={24}
                     onSetRating={setUserRating}
-                    defaultRating={
-                      isWathedMovie ? findWathedMovie[0].userRating : 0
-                    }
                   />
                   {userRating && (
                     <button className="btn-add" onClick={handleAddToWatched}>
@@ -291,7 +288,17 @@ function MovieDetails({
                   )}
                 </>
               ) : (
-                <p>You already Rated this movie</p>
+                <>
+                  <p>You already rated this movie</p>
+                  <StarRating
+                    maxRating={10}
+                    size={24}
+                    defaultRating={
+                      isWathedMovie ? findWathedMovie[0].userRating : 0
+                    }
+                    disabled={true}
+                  />
+                </>
               )}
             </div>
             <p>
