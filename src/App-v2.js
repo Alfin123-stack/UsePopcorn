@@ -31,6 +31,7 @@ export default function App() {
   }
 
   useEffect(() => {
+    const controller = new AbortController();
     // Define an asynchronous function to fetch movie data
     const fetchMovies = async () => {
       try {
@@ -38,7 +39,8 @@ export default function App() {
         setError("");
         // Fetch the data from the API
         const response = await fetch(
-          `http://www.omdbapi.com/?apikey=${apiKey}&s=${query}`
+          `http://www.omdbapi.com/?apikey=${apiKey}&s=${query}`,
+          { signal: controller.signal }
         );
 
         // Check if the response is okay (status in the range 200-299)
@@ -54,11 +56,14 @@ export default function App() {
         // Handle the data
         setMovies(data.Search);
 
-        console.log("fetchingg");
+        setError("");
       } catch (error) {
         // Handle any errors that occurred during the fetch
-        console.error("Error fetching data:", error);
-        setError(error.message);
+
+        if (error.name !== "AbortError") {
+          console.log("Error fetching data:", error);
+          setError(error.message);
+        }
       } finally {
         console.log("selesai loading");
         setIsLoading(false);
@@ -71,8 +76,15 @@ export default function App() {
       return;
     }
 
+    handleCloseDetails();
+
     // Call the fetch function
     fetchMovies();
+
+    // clear request api
+    return function () {
+      controller.abort();
+    };
   }, [query]);
 
   return (
@@ -253,10 +265,26 @@ function MovieDetails({
     function () {
       if (!title) return;
       document.title = `Movie | ${title}`;
+
+      return function () {
+        document.title = "usePopcorn";
+      };
     },
     [title]
   );
 
+  useEffect(function () {
+    function callBack(e) {
+      if (e.code === "Escape") {
+        onCloseDetails();
+      }
+    }
+    document.addEventListener("keydown", callBack);
+
+    return function () {
+      document.removeEventListener("keydown", callBack);
+    };
+  });
   return (
     <div className="details">
       {isLoading ? (
