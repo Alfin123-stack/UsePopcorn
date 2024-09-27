@@ -41,7 +41,6 @@ export function useMovies(query) {
           setError(error.message);
         }
       } finally {
-        console.log("selesai loading");
         setIsLoading(false);
       }
     };
