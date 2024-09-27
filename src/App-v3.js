@@ -1,20 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
-
+import { useMovies } from "./useMovies";
+const apiKey = "cc5bd20f";
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
-const apiKey = "cc5bd20f";
-
 export default function App() {
-  const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(function () {
     return JSON.parse(localStorage.getItem("watched")) || [];
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
   const [query, setQuery] = useState("avengers");
   const [selectedId, setSelectedId] = useState(null);
+  const { movies, isLoading, error } = useMovies(query);
 
   function handleSelectedId(movieId) {
     setSelectedId((id) => (id === movieId ? null : movieId));
@@ -38,63 +35,6 @@ export default function App() {
     },
     [watched]
   );
-
-  useEffect(() => {
-    const controller = new AbortController();
-    // Define an asynchronous function to fetch movie data
-    const fetchMovies = async () => {
-      try {
-        setIsLoading(true);
-        setError("");
-        // Fetch the data from the API
-        const response = await fetch(
-          `http://www.omdbapi.com/?apikey=${apiKey}&s=${query}`,
-          { signal: controller.signal }
-        );
-
-        // Check if the response is okay (status in the range 200-299)
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        // Parse the JSON data from the response
-        const data = await response.json();
-
-        if (data.Response === "False") throw new Error("Movie not found");
-
-        // Handle the data
-        setMovies(data.Search);
-
-        setError("");
-      } catch (error) {
-        // Handle any errors that occurred during the fetch
-
-        if (error.name !== "AbortError") {
-          console.log("Error fetching data:", error);
-          setError(error.message);
-        }
-      } finally {
-        console.log("selesai loading");
-        setIsLoading(false);
-      }
-    };
-
-    if (query.length < 3) {
-      setError("");
-      setMovies([]);
-      return;
-    }
-
-    handleCloseDetails();
-
-    // Call the fetch function
-    fetchMovies();
-
-    // clear request api
-    return function () {
-      controller.abort();
-    };
-  }, [query]);
 
   return (
     <>
