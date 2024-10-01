@@ -1,19 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App-v3";
+import "./styles/index.css";
+import App from "./apps/App-v3";
 
-import StarRating from "./StarRating";
+// import StarRating from "./StarRating";
 
-function Test() {
-  const [rating, setRating] = useState(0);
-  return (
-    <div>
-      <StarRating maxRating={10} onSetRating={setRating} />
-      <p>this movie is rated by {rating} stars</p>
-    </div>
-  );
-}
+// function Test() {
+//   const [rating, setRating] = useState(0);
+//   return (
+//     <div>
+//       <StarRating maxRating={10} onSetRating={setRating} />
+//       <p>this movie is rated by {rating} stars</p>
+//     </div>
+//   );
+// }
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
