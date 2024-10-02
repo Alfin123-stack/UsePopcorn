@@ -3,18 +3,6 @@ import ReactDOM from "react-dom/client";
 import "./styles/index.css";
 import App from "./apps/App-v3";
 
-// import StarRating from "./StarRating";
-
-// function Test() {
-//   const [rating, setRating] = useState(0);
-//   return (
-//     <div>
-//       <StarRating maxRating={10} onSetRating={setRating} />
-//       <p>this movie is rated by {rating} stars</p>
-//     </div>
-//   );
-// }
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
